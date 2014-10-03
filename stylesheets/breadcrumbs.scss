@@ -1,0 +1,30 @@
+.leeroy-breadcrumbs-container {
+  background-color: #40454F;
+  color: white;
+  padding: 12px;
+  font-size: 1.4rem;
+}
+
+.leeroy-breadcrumbs-container a {
+  color: white;
+  text-decoration: none;
+}
+
+.leeroy-breadcrumb {
+  color: white;
+  text-decoration: none;
+}
+
+.leeroy-breadcrumb:hover {
+  text-decoration: underline;
+}
+
+.leeroy-breadcrumb:before {
+  padding: 0px 5px;
+  color: #fff;
+  content: "/\00a0";
+}
+
+.leeroy-breadcruemb:last-of-type {
+  content: "";
+}

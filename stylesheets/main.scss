@@ -1,0 +1,28 @@
+* { box-sizing: border-box }
+
+@import "typography";
+@import "x-flex";
+@import "breadcrumbs";
+@import "material";
+@import "jobs";
+@import "builds";
+
+body {
+  margin: 0;
+}
+
+.leeroy-layout {
+  @extend %flex;
+  @extend %flex-column;
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+}
+
+.leeroy-build-section,
+.leeroy-job-section,
+.leeroy-jobs-list {
+  @extend %flex-1;
+}

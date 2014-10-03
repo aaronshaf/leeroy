@@ -1,0 +1,103 @@
+.leeroy-build-section {
+  padding: 18px;
+  overflow: auto;
+}
+
+.leeroy-build-mug {
+  border-radius: 32px;
+  width: 32px;
+  height: 32px;
+}
+
+.leeroy-build-list {
+  overflow: auto;
+  max-width: 450px;
+  border-right: 1px solid #C4CBCC;
+  margin: 0;
+}
+
+.leeroy-build-link {
+  @extend %flex; 
+  text-decoration: none;
+  color: black;
+  border-bottom: 1px solid #D3D3D3;  
+}
+
+.leeroy-build-list-item {
+  text-decoration: none;
+  color: black;
+  display: block;
+  font-size: 0.92rem;
+}
+
+.leeroy-build-list-item-title {
+  font-size: 0.9rem;
+}
+
+.leeroy-build-list-item-name {
+  font-size: 0.8rem;
+}
+
+.leeroy-label-success {
+  background-color: green;
+  color: white; 
+}
+
+.leeroy-label-failure {
+  background-color: red;
+  color: white; 
+}
+
+.leeroy-build-list {
+  @extend %flex-1;
+  list-style: none;
+  padding: 0;
+}
+
+.leeroy-build-link {
+  padding: 16px;
+  font-size: 0.92rem;
+}
+
+.leeroy-build-link.active {
+  background-color: #f6f6f6;
+}
+
+.leeroy-build-success {
+  background-color: green;
+}
+
+.leeroy-build-duration {
+  color: #999999;
+  font-size: 0.8rem;
+  margin-top: 4px;
+}
+
+.leeroy-build-status-column {
+  min-width: 24px;
+}
+
+.leeroy-build-status {
+  width: 16px;
+  height: 16px;
+  margin-right: 4px;
+  margin-top: 1px;
+}
+
+.leeroy-changeset-comment {
+  display: block;
+  background-color: #FAFAFA;
+  padding: 8px;
+  font-size: 0.9rem;
+  border-radius: 3px;
+}
+
+.leeroy-build-output {
+  font-family: monospace;
+  color: #F1F1F1;
+  line-height: 1.6rem;
+  background-color: #222222;
+  padding: 8px;
+  font-size: 0.95rem;
+  white-space: pre;
+}
