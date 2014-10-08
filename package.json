@@ -5,7 +5,7 @@
   "main": "index.js",
   "scripts": {
     "dev": "rm -rf dist && node_modules/gulp/bin/gulp.js dev",
-    "start": "node index.js",
+    "start": "node_modules/gulp/bin/gulp.js && node index.js",
     "build": "rm -rf dist && node_modules/gulp/bin/gulp.js"
   },
   "repository": {
@@ -22,12 +22,11 @@
   },
   "homepage": "https://github.com/aaronshaf/leeroy",
   "dependencies": {
+    "array.prototype.find": "^1.0.0",
     "dotenv": "^0.4.0",
     "es6-promisify": "^1.1.1",
     "express": "^4.9.3",
-    "jenkins-api": "^0.2.4"
-  },
-  "devDependencies": {
+    "jenkins-api": "^0.2.4",
     "ansi_up": "^1.1.2",
     "browserify": "^5.12.1",
     "es6-promise": "^1.0.0",
