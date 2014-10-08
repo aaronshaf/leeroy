@@ -52,5 +52,5 @@ app.get('/api/jobs/:job/builds/:build/output', function(req, res){
 
 app.use(express.static(__dirname + '/dist'))
 
-app.listen(3000)
+app.listen(process.env.PORT || 3000)
 
