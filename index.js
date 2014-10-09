@@ -1,11 +1,20 @@
 require('dotenv').load()
 var express = require('express')
-var jenkinsapi = require('jenkins-api')
-var jenkins = jenkinsapi.init(process.env.JENKINS_HOST)
 var Job = require('./models/job')
 var Build = require('./models/build')
 
 var app = express()
+
+app.get('/api/builds', function(req, res) {
+  Build
+    .findRecent()
+    .then(function(data) {
+      res.setHeader('Content-Type', 'application/json')
+      res.end(JSON.stringify({jobs:data}, null, 2)) 
+    }).catch(function(error) {
+      res.json('error',error)       
+    })
+})
 
 app.get('/api/jobs', function(req, res) {
   Job
