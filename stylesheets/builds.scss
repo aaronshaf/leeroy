@@ -1,3 +1,5 @@
+$color1:#293640;
+
 .leeroy-build-section {
   padding: 18px;
   overflow: auto;
@@ -12,6 +14,7 @@
 .leeroy-build-list {
   overflow: auto;
   max-width: 450px;
+  background-color: $color1;
   border-right: 1px solid #C4CBCC;
   margin: 0;
 }
@@ -19,8 +22,12 @@
 .leeroy-build-link {
   @extend %flex; 
   text-decoration: none;
-  color: black;
-  border-bottom: 1px solid #D3D3D3;  
+  color: white;
+  border-bottom: 1px solid #505C64;  
+}
+
+.leeroy-build-link:hover {
+  background-color: darken($color1,3) 
 }
 
 .leeroy-build-list-item {
@@ -60,7 +67,7 @@
 }
 
 .leeroy-build-link.active {
-  background-color: #f6f6f6;
+  background-color: darken($color1,7);
 }
 
 .leeroy-build-success {

@@ -24,13 +24,27 @@ module.exports = React.createClass({
   },
 
   componentWillReceiveProps(nextProps) {
-    this.setState({
-    })
+    this.update(nextProps)
+  },
 
-    request.get('/api/jobs/' + nextProps.params.jobName + '/builds/' + nextProps.params.buildNumber, (error, result) => {
+  componentDidMount() {
+    this.update(this.props)
+  },
+
+  update(nextProps) {
+    //this.getBuild(nextProps)
+    this.getOutput(nextProps)
+  },
+
+  getBuild(props) {
+    return null
+    request.get('/api/jobs/' + props.params.jobName + '/builds/' + props.params.buildNumber, (error, result) => {
       if(error || !result.body) return
 
-      var gerritParameterArray = result.body.builds.actions.find((element) => element.parameters).parameters
+      var gerritParameterArray = result.body.builds.actions.find((element) => {
+        if(!element) return false
+        element.parameters
+      }).parameters
       var gerritParameters = {}
       gerritParameterArray.forEach((param) => {
         gerritParameters[param.name] = param.value                  
@@ -43,15 +57,19 @@ module.exports = React.createClass({
       })
     })
 
-    request.get('/api/jobs/' + nextProps.params.jobName + '/builds/' + nextProps.params.buildNumber + '/output', (error, result) => {
-      console.log(error,result)
+  },
+
+  getOutput(props) {
+    request.get('/api/jobs/' + props.params.jobName + '/builds/' + props.params.buildNumber + '/output', (error, result) => {
+      if(error || !result.body) return
       this.setState({
         output: result.body.output
       })
-    })
+    }) 
   },
 
   render() {
+    console.log(this.state)
     var imageUrl = null
     if(this.state.gerritParameters.GERRIT_EVENT_ACCOUNT_EMAIL) {
       imageUrl = gravatar.url(this.state.gerritParameters.GERRIT_EVENT_ACCOUNT_EMAIL, {s: '60', r: 'pg'});
@@ -78,10 +96,12 @@ module.exports = React.createClass({
         className="leeroy-changeset-comment"
         dangerouslySetInnerHTML={{__html: changesetComment}}></div>
 
-        <div
+        {/*<div
         className="leeroy-build-output"
-        dangerouslySetInnerHTML={{__html: ansi_up.ansi_to_html(this.state.output || '')}}>
-        </div>
+        dangerouslySetInnerHTML={{__html: (this.state.output || '')}}>
+        </div>*/}
+
+       <div>{this.state.output}</div>
       </section>
     )
   }

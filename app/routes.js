@@ -26,19 +26,10 @@ var routes = (
       handler={require('./components/index')}>
       
         <Route
-        name="job"
-        path="/jobs/:jobName"
-        handler={require('./components/job')}>
-        
-          <Route
-          name="build"
-          path="/jobs/:jobName/builds/:buildNumber"
-          handler={require('./components/build')} />
+        name="build"
+        path="/jobs/:jobName/builds/:buildNumber"
+        handler={require('./components/build')} />
 
-        </Route>
-
-        <DefaultRoute
-        handler={require('./components/jobs')} />
       </Route>
     </Route>
   </Routes>

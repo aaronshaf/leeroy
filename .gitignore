@@ -4,3 +4,6 @@ dist
 db
 tmp
 *.log
+test.js
+.tmp
+dump.rdb

@@ -1,8 +1,6 @@
 const gulp = require('gulp')
 const gutil = require('gulp-util')
-const eslint = require('gulp-eslint')
 const react = require('gulp-react')
-const eslintConfig = require('./eslint.json')
 const uglify = require('gulp-uglify')
 const browserify = require('browserify')
 const source = require('vinyl-source-stream')
@@ -60,17 +58,9 @@ gulp.task('sass', function() {
     .pipe(gulp.dest('dist'))
 })
 
-gulp.task('lint', function () {
-  return gulp.src(['app/**/*.js'])
-    .pipe(cache('linting'))
-    .pipe(react())
-    .pipe(eslint(eslintConfig))
-    .pipe(eslint.format())
-})
-
 gulp.task('default', ['assets', 'sass', 'uglify'])
 
-gulp.task('dev', ['assets', 'sass', 'browserify', 'lint'],
+gulp.task('dev', ['assets', 'sass', 'browserify'],
   function() {
     gulp.watch([
       'assets/**/*'
@@ -82,7 +72,7 @@ gulp.task('dev', ['assets', 'sass', 'browserify', 'lint'],
 
     gulp.watch([
       'app/**/*.js'
-    ], ['lint', 'browserify'])
+    ], ['browserify'])
   }
 )
 
