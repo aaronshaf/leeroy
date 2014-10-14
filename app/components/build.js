@@ -27,30 +27,38 @@ module.exports = React.createClass({
     this.update(nextProps)
   },
 
-  componentDidMount() {
-    this.update(this.props)
-  },
+//  componentDidMount() {
+    //this.update(this.props)
+//  },
 
   update(nextProps) {
-    //this.getBuild(nextProps)
+    this.getBuild(nextProps)
     this.getOutput(nextProps)
   },
 
   getBuild(props) {
-    return null
+    console.log('getBuild')
     request.get('/api/jobs/' + props.params.jobName + '/builds/' + props.params.buildNumber, (error, result) => {
-      if(error || !result.body) return
+      if(error || !result.body) {
+        console.log('Why is this being called twice?')
+        return
+      }
 
-      var gerritParameterArray = result.body.builds.actions.find((element) => {
+      var gerritParameterObject = result.body.builds.actions.find((element) => {
         if(!element) return false
-        element.parameters
-      }).parameters
+        return element.parameters
+      })
+      var gerritParameterArray = []
+      if(gerritParameterObject && gerritParameterObject.parameters) {
+        gerritParameterArray = gerritParameterObject.parameters
+      }
       var gerritParameters = {}
       gerritParameterArray.forEach((param) => {
         gerritParameters[param.name] = param.value                  
       })
 //      console.log(JSON.stringify(result.body,null,2))
 
+      console.log({gerritParameters})
       this.setState({
         build: result.body.builds,
         gerritParameters: gerritParameters
@@ -61,24 +69,32 @@ module.exports = React.createClass({
 
   getOutput(props) {
     request.get('/api/jobs/' + props.params.jobName + '/builds/' + props.params.buildNumber + '/output', (error, result) => {
-      if(error || !result.body) return
-      this.setState({
-        output: result.body.output
-      })
+      if(error || !result.body) {
+        console.log(error,result)
+        return
+      }
+      //this.setState({
+      //  output: result.body.output
+      //})
+
+      // Dirty
+      this.refs['console-output'].getDOMNode().innerHTML = result.body.output
     }) 
   },
 
   render() {
-    console.log(this.state)
+    console.log('render',this.state.gerritParameters)
+    
     var imageUrl = null
     if(this.state.gerritParameters.GERRIT_EVENT_ACCOUNT_EMAIL) {
       imageUrl = gravatar.url(this.state.gerritParameters.GERRIT_EVENT_ACCOUNT_EMAIL, {s: '60', r: 'pg'});
     }
 
     var changesetComment = null
-    if(this.state.build
+    if(this.state.build 
         && this.state.build.changeSet
-        && this.state.build.changeSet.items) {
+        && this.state.build.changeSet.items
+        && this.state.build.changeSet.items.length) {
       changesetComment = markdown.toHTML(this.state.build.changeSet.items[0].comment)
     }
     return (
@@ -96,12 +112,13 @@ module.exports = React.createClass({
         className="leeroy-changeset-comment"
         dangerouslySetInnerHTML={{__html: changesetComment}}></div>
 
+        <div ref="console-output"></div>
+
         {/*<div
         className="leeroy-build-output"
         dangerouslySetInnerHTML={{__html: (this.state.output || '')}}>
         </div>*/}
 
-       <div>{this.state.output}</div>
       </section>
     )
   }

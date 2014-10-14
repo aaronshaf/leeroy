@@ -13,6 +13,7 @@ mongoose.connect(process.env.MONGO_URL);
 var Schema = mongoose.Schema
 var sanitizeKeys = require('../utils/sanitize-keys')
 var ansi_up = require('ansi_up')
+var humanize = require('humanize')
 
 console.log('process.env.JENKINS_HOST',process.env.JENKINS_HOST)
 
@@ -25,21 +26,22 @@ var buildSchema = new Schema({
   fullDisplayName: String,
   jenkinsId: String,
   number: Number,
-  result: String,
+  result: Mixed, // When not SUCCESS/FAILURE, it is returning an object?
   timestamp: Date,
   url: String,
   builtOn: String,
   changeSet: Mixed,
+  output: String,
   updatedAt: { type: Date, default: Date.now }
 })
 var Build = mongoose.model('Build', buildSchema)
 
 var finishedBuilds = []
-var limit = 500
+var limit = 25
 
 function findRecent() {
   return new Promise(function(resolve, reject) {
-    Build.find().sort({timestamp:-1}).limit(100).exec(function(error,builds) {
+    Build.find().select({output: 0}).sort({timestamp:-1}).limit(100).exec(function(error,builds) {
       if(error) {
         return reject(error)
       }
@@ -48,23 +50,35 @@ function findRecent() {
   })
 }
 
+function extractBuilds(jobs) {
+  var result = jobs.map(function(job) {
+    return job.builds.map(function(build) {
+      return {jobName: job.name, number: build.number}
+    })
+  })
+
+  return flatten(result)
+}
+
+function unfinished(build) {
+  return finishedBuilds.indexOf(build.jobName + ' #' + build.number) === -1
+}
+
+function findAllBuilds(builds) {
+  return Promise.all(builds.map(function(build) {
+    return find(build.jobName,build.number)
+  }))
+}
+
 function updateRecent() {
   return Job
     .findAll()
     .then(function(jobs) {
-      var builds = shuffle(flatten(jobs.map(function(job) {
-        return job.builds.map(function(build) {
-          return {jobName: job.name, number: build.number}
-        })
-      })).filter(function(build) {
-        return finishedBuilds.indexOf(build.jobName + ' #' + build.number) === -1
-      })).slice(0,limit)
+      var builds = shuffle(extractBuilds(jobs))
+        .filter(unfinished)
+        .slice(0,limit)
 
-      var countA = 0
-      return Promise.all(builds.map(function(build) {
-        return find(build.jobName,build.number)
-      }))
-
+      return findAllBuilds(builds)
     }).catch(function(error) {
       res.json('error',error)       
     })
@@ -80,21 +94,15 @@ function isFinished(result) {
   return result && result.result && (result.result !== 'FAILURE' || result.result !== 'SUCCESS')
 }
 
-var times = 0
-
-
-
 function find(jobName,buildNumber) {
   return new Promise(function(resolve, reject) {
-    //console.log(times++)
-
     var parsedResult = {}
     var path = 'jobs/' + jobName + '/builds/' + buildNumber
 
     Build.findOne({
       jobName: jobName,
       number: buildNumber
-    }, function(error, result) {
+    }).select({output: 0}).exec(function(error, result) {
       //if(error || !result) {
       //  reject()
       //} 
@@ -118,43 +126,61 @@ function find(jobName,buildNumber) {
               console.log(error)
             }
           })
-          //console.log('resolving: ' + path)
           if(isFinished(result)) {
             finishedBuilds.push(jobName + ' #' + buildNumber)
           }
           resolve(result)
         })
+        getOutputFromJenkins(jobName,buildNumber)
       } else {
-        console.log('no?')
         finishedBuilds.push(jobName + ' #' + buildNumber)
-        console.log('resolving (cached): ' + path)
-        //console.log(times++)
+        //console.log(path + ' already finished')
         resolve(result)
       }
     })
   })
 }
 
-function getOutput(jobName,buildNumber,callback) {
-  var returned = false
-  path = 'jobs/' + jobName + '/builds/' + buildNumber + '/output'
-
-  db.get(path, function(error, result) {
-    if(!error && !returned) {
-      callback(error, JSON.parse(result))
-      returned = true
-    }
-  })
-
+function getOutputFromJenkins(jobName,buildNumber) {
   jenkins.job_output(jobName,buildNumber,function(error, result) {
-    if(result && result.output) {
-      result.output = ansi_up.ansi_to_html(result.output)
+    var lines
+    if(!error && result && result.output) {
+      var lines = result.output.split("\n").slice(-200)
+      result.output = humanize.nl2br(ansi_up.ansi_to_html(lines.join("\n")))
     }
-    db.set(path, JSON.stringify(result), function() {})
-    if(!returned) {
-      callback(error,result)
-      returned = true
-    }
+    //db.set(path, JSON.stringify(result), function() {})
+
+    Build.update({
+      jobName: jobName,
+      number: buildNumber
+    }, {
+      output: result.output
+    }, {
+      upsert: true
+    }, function(error, result) {
+      //TODO: event emitter
+      //console.log(error,result)
+    })
+  })
+}
+
+function getOutput(jobName,buildNumber) {
+  return new Promise(function(resolve, reject) {
+    var returned = false
+    path = 'jobs/' + jobName + '/builds/' + buildNumber + '/output'
+
+    Build.findOne({
+      jobName: jobName,
+      number: buildNumber
+    }).select({
+      result: 1,
+      output: 1
+    }).exec(function(error, result) {
+      if(!isFinished(result)) {
+        getOutputFromJenkins(jobName,buildNumber)
+      }
+      resolve(result.output)
+    })
   })
 }
 
@@ -163,3 +189,4 @@ exports.findRecent = findRecent
 exports.updateRecent = updateRecent
 exports.findMany = findMany
 exports.getOutput = getOutput
+

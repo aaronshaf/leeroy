@@ -22,7 +22,12 @@ app.get('/api/builds', function(req, res) {
     .findRecent()
     .then(function(builds) {
       res.setHeader('Content-Type', 'application/json')
-      res.status(200).end(JSON.stringify({builds:builds}, null, 2))   
+      res.status(200).end(JSON.stringify({
+        builds: builds,
+        meta: {
+          count: builds.length
+        }
+      }, null, 2))   
     }).catch(function(error) {
       res.status(500).json({error:error})
     })
@@ -63,14 +68,14 @@ app.get('/api/jobs/:job/builds/:build', function(req, res){
 })
 
 app.get('/api/jobs/:job/builds/:build/output', function(req, res){
-  Build.getOutput(req.params.job, req.params.build, function(err, data) {
-    if (err) {
-      res.setHeader('Content-Type', 'application/json')
-      res.end(JSON.stringify(data, null, 2))
-      return console.log(err)
-    }
+  Build.getOutput(req.params.job, parseInt(req.params.build,10)).then(function(data) {
     res.setHeader('Content-Type', 'application/json')
-    res.end(JSON.stringify(data.output, null, 2))
+    res.end(JSON.stringify({output: data}, null, 2))
+  }).catch(function(err) {
+    res.setHeader('Content-Type', 'application/json')
+    console.log('failure')
+    res.end(JSON.stringify(data, null, 2))
+    return console.log(err)
   })
 })
 
