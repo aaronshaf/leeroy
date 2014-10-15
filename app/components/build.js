@@ -7,6 +7,7 @@ var markdown = require( "markdown" ).markdown
 var gravatar = require('gravatar')
 var ansi_up = require('ansi_up')
 require('array.prototype.find')
+var humanize = require('humanize')
 
 module.exports = React.createClass({
   displayName: 'Build',
@@ -95,7 +96,7 @@ module.exports = React.createClass({
         && this.state.build.changeSet
         && this.state.build.changeSet.items
         && this.state.build.changeSet.items.length) {
-      changesetComment = markdown.toHTML(this.state.build.changeSet.items[0].comment)
+      changesetComment = humanize.nl2br(this.state.build.changeSet.items[0].comment)
     }
     return (
       <section className="leeroy-build-section">
@@ -112,7 +113,7 @@ module.exports = React.createClass({
         className="leeroy-changeset-comment"
         dangerouslySetInnerHTML={{__html: changesetComment}}></div>
 
-        <div ref="console-output"></div>
+        <div className="leeroy-console-output" ref="console-output"></div>
 
         {/*<div
         className="leeroy-build-output"

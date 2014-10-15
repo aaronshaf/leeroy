@@ -2,20 +2,27 @@ $color1:#293640;
 
 .leeroy-build-section {
   padding: 18px;
-  overflow: auto;
+  overflow-y: auto;
+  overflow-x: hidden;
+  background-color: #222222;
+  color: white;
+}
+
+.leeroy-console-output {
+  font-family: Courier, "Courier New", monospace;
 }
 
 .leeroy-build-mug {
   border-radius: 32px;
   width: 32px;
   height: 32px;
+  border-color: transparent;
 }
 
 .leeroy-build-list {
   overflow: auto;
   max-width: 450px;
   background-color: $color1;
-  border-right: 1px solid #C4CBCC;
   margin: 0;
 }
 
@@ -23,7 +30,7 @@ $color1:#293640;
   @extend %flex; 
   text-decoration: none;
   color: white;
-  border-bottom: 1px solid #505C64;  
+  border-bottom: 1px solid #212B33;  
 }
 
 .leeroy-build-link:hover {
@@ -93,7 +100,6 @@ $color1:#293640;
 
 .leeroy-changeset-comment {
   display: block;
-  background-color: #FAFAFA;
   padding: 8px;
   font-size: 0.9rem;
   border-radius: 3px;

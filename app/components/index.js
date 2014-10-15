@@ -67,9 +67,9 @@ module.exports = React.createClass({
       var statusImage = null
       if(build.result === 'SUCCESS') {
         className += 'leeroy-build-success'
-        statusImage = <img src="/svg/checkmark.svg" className="leeroy-build-status" />
+        statusImage = <img src="/svg/icon-check.svg" className="leeroy-build-status" />
       } else if(build.result === 'FAILURE') {
-        statusImage = <img src="/svg/cross.svg" className="leeroy-build-status" />
+        statusImage = <img src="/svg/icon-x.svg" className="leeroy-build-status" />
       }
 
       var duration = ''

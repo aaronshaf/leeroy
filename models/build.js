@@ -37,7 +37,18 @@ var buildSchema = new Schema({
 var Build = mongoose.model('Build', buildSchema)
 
 var finishedBuilds = []
-var limit = 25
+var limit = 10
+
+Build.find({
+  $or: [
+    {result: "SUCCESS"},
+    {result: "FAILURE"}
+  ]
+}).select({jobName:1,number:1}).sort({timestamp:-1}).limit(1500).exec(function(error, result) {
+  result.forEach(function(build) {
+    finishedBuilds.push(build.jobName + ' #' + build.number)
+  })
+})
 
 function findRecent() {
   return new Promise(function(resolve, reject) {
