@@ -98,7 +98,7 @@ module.exports = React.createClass({
         <h1>{patchSetLink}</h1>
 
         {mug}
-        {this.state.gerritParameters.GERRIT_CHANGE_OWNER_NAME}
+        {this.state.gerritParameters.GERRIT_PATCHSET_UPLOADER_NAME}
 
         <div
         className="leeroy-changeset-comment"
