@@ -7,11 +7,7 @@ source.addEventListener('open', function(e) {
 }, false)
 
 source.addEventListener('error', function(e) {
-  console.log('Error',e)
-}, false)
-
-source.addEventListener('message', function(e) {
-  console.log('huh?',e.data);
+  console.log('EventSource error',e)
 }, false)
 
 var Build = {
@@ -35,7 +31,8 @@ var Build = {
 
   subscribe(callback) {
     source.addEventListener('message', function(e) {
-      console.log(e.data);
+      var data = JSON.parse(e.data)
+      callback(data)
     }, false)
   }
 }

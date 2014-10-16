@@ -208,6 +208,7 @@ function getOutput(jobName,buildNumber) {
       result: 1,
       output: 1
     }).exec(function(error, result) {
+      if(error || !result) return reject()
       if(!isFinished(result)) {
         getOutputFromJenkins(jobName,buildNumber)
       }

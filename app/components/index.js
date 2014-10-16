@@ -36,8 +36,12 @@ module.exports = React.createClass({
       })
     })
 
-    Build.subscribe(() => {
-      console.log('updated')              
+    Build.subscribe((data) => {
+      if(data.builds) {
+        this.setState({
+          builds: this.state.builds.concat(data.builds)
+        })
+      }
     })
   },
 
