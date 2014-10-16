@@ -1,12 +1,39 @@
 require('dotenv').load()
 var express = require('express')
+var app = express()
+var server = require('http').Server(app)
+var io = require('socket.io')(server)
 var Job = require('./models/job')
 var Build = require('./models/build')
 var Promise = require('es6-promise').Promise
+setInterval(Build.updateRecent,30000)
 
-var app = express()
+function partialListener(res) {
+  return function(message) {
+    // res.write('id: ' + messageCount + '\n')
+    res.write("data: " + JSON.stringify(message) + '\n\n')
+  }
+}
 
-app.get('/api/builds/update', function(req, res) {
+app.get('/api/builds/test_stream', function(req, res) {
+  Build.update()
+  res.json(true)
+})
+
+app.get('/api/builds/stream', function(req, res) {
+  req.socket.setTimeout(Infinity)
+  var listener = partialListener(res)
+
+  res.writeHead(200, {
+    'Content-Type': 'text/event-stream',
+    'Connection': 'keep-alive',
+    'Cache-Control': 'no-cache',
+  })
+  res.write('\n')
+
+  Build.subscribe(listener)
+
+  /*
   Build
     .updateRecent()
     .then(function(builds) {
@@ -15,6 +42,11 @@ app.get('/api/builds/update', function(req, res) {
     }).catch(function(error) {
       res.status(500).json({error:error})
     })
+  */
+
+  res.on('close', function() {
+    Build.unsubscribe(listener)
+  })
 })
 
 app.get('/api/builds', function(req, res) {

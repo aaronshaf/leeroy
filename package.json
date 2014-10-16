@@ -29,7 +29,8 @@
     "es6-promise": "^1.0.0",
     "es6-promisify": "^1.1.1",
     "es6ify": "^1.4.0",
-    "express": "^4.9.3",
+    "express": "^4.9.7",
+    "flux": "^2.0.1",
     "gravatar": "^1.0.6",
     "gulp": "^3.8.8",
     "gulp-cached": "^1.0.1",
@@ -54,6 +55,8 @@
     "react-router": "^0.7.0",
     "redis": "^0.12.1",
     "redis-url": "^0.2.0",
+    "rx": "^2.3.13",
+    "socket.io": "^1.1.0",
     "superagent": "^0.19.1",
     "vinyl-buffer": "^1.0.0",
     "vinyl-source-stream": "^1.0.0"

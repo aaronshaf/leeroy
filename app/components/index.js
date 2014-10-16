@@ -1,10 +1,17 @@
 /** @jsx React.DOM */
+require('array.prototype.find')
 var React = require('react')
 var Router = require('react-router')
 var Link = require('react-router').Link
 var request = require('superagent')
 var moment = require('moment')
-require('array.prototype.find')
+var extractGerritParameters = require('../../../utils/gerrit-params')
+var Build = require('../models/build')
+var BuildStatusImage = require('./build-status-image')
+
+function hasActions(build) {
+  return build.actions && build.actions.find
+}
 
 module.exports = React.createClass({
   displayName: 'Builds',
@@ -21,57 +28,32 @@ module.exports = React.createClass({
   },
 
   componentDidMount() {
-    request.get('/api/builds', (error, result) => {
-      if(error) return
+    Build.findAll().then((result) => {
+      if(!this.isMounted()) return
       this.setState({
-        builds: result.body.builds.slice(0,50),
+        builds: result.builds.filter(hasActions),
         loading: false
       })
+    })
+
+    Build.subscribe(() => {
+      console.log('updated')              
     })
   },
 
   render() {
-    var gerritChangeNumbers = []
+    var gerritChangeNumbers = new Set()
 
     var builds = this.state.builds.map((build) => {
-      var gerritParameters = {}
-      var id
-      if(!build.actions || !build.actions.find) {
-        return null
-      }
-      var gerritParameterArray = build.actions.find((element) => {
-        if(!element) return false
-        return element.parameters
-      })
-      if(gerritParameterArray) {
-        gerritParameterArray = gerritParameterArray.parameters
-      
-        gerritParameterArray.forEach((param) => {
-          gerritParameters[param.name] = param.value                  
-        })
-      } else {
-        return null
-      }
-      var name = null
-      if(gerritParameters.GERRIT_EVENT_ACCOUNT_NAME) {
-        name = gerritParameters.GERRIT_EVENT_ACCOUNT_NAME
-      }
-
+      var gerritParameters = extractGerritParameters(build)
+      var id 
       id = gerritParameters.GERRIT_CHANGE_NUMBER || build.id
-      if(gerritChangeNumbers.indexOf(id) > -1) {
+      if(gerritChangeNumbers.has(id)) {
         return null
       }
-      gerritChangeNumbers.push(id)
+      gerritChangeNumbers.add(id)
 
       var className = "leeroy-build-list-item"
-      var statusImage = null
-      if(build.result === 'SUCCESS') {
-        className += 'leeroy-build-success'
-        statusImage = <img src="/svg/icon-check.svg" className="leeroy-build-status" />
-      } else if(build.result === 'FAILURE') {
-        statusImage = <img src="/svg/icon-x.svg" className="leeroy-build-status" />
-      }
-
       var duration = ''
       var minutes
       var seconds
@@ -94,7 +76,7 @@ module.exports = React.createClass({
             buildNumber: build.number
           }}>
             <div className="leeroy-build-status-column">
-              {statusImage}
+              <BuildStatusImage status={build.result} />
             </div>
             <div className="leeroy-build-preview-column">
               <div className="leeroy-build-list-item-title">

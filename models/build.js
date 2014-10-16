@@ -15,7 +15,10 @@ var sanitizeKeys = require('../utils/sanitize-keys')
 var ansi_up = require('ansi_up')
 var humanize = require('humanize')
 
-console.log('process.env.JENKINS_HOST',process.env.JENKINS_HOST)
+var EventEmitter = require("events").EventEmitter
+var buildEventEmitter = new EventEmitter()
+
+console.log('JENKINS_HOST=',process.env.JENKINS_HOST)
 
 var buildSchema = new Schema({
   jobName: String,
@@ -26,7 +29,7 @@ var buildSchema = new Schema({
   fullDisplayName: String,
   jenkinsId: String,
   number: Number,
-  result: Mixed, // When not SUCCESS/FAILURE, it is returning an object?
+  result: String,
   timestamp: Date,
   url: String,
   builtOn: String,
@@ -42,6 +45,7 @@ var limit = 10
 Build.find({
   $or: [
     {result: "SUCCESS"},
+    {result: "ABORTED"},
     {result: "FAILURE"}
   ]
 }).select({jobName:1,number:1}).sort({timestamp:-1}).limit(1500).exec(function(error, result) {
@@ -50,9 +54,17 @@ Build.find({
   })
 })
 
+function subscribe(listener) {
+  buildEventEmitter.on('update', listener)
+}
+
+function unsubscribe(listener) {
+  buildEventEmitter.removeListener('update',listener)
+}
+
 function findRecent() {
   return new Promise(function(resolve, reject) {
-    Build.find().select({output: 0}).sort({timestamp:-1}).limit(100).exec(function(error,builds) {
+    Build.find().select({output: 0}).sort({timestamp:-1}).limit(50).exec(function(error,builds) {
       if(error) {
         return reject(error)
       }
@@ -102,11 +114,18 @@ function findMany(jobName,buildNumbers) {
 }
 
 function isFinished(result) {
-  return result && result.result && (result.result !== 'FAILURE' || result.result !== 'SUCCESS')
+  return result && result.result && ['FAILURE','SUCCESS','ABORTED'].indexOf(result.result) > -1
+}
+
+function update() {
+  buildEventEmitter.emit('update', {foo: 'bar'})
 }
 
 function find(jobName,buildNumber) {
   return new Promise(function(resolve, reject) {
+    if(jobName == null || buildNumber == null) {
+      return reject()
+    }
     var parsedResult = {}
     var path = 'jobs/' + jobName + '/builds/' + buildNumber
 
@@ -137,6 +156,8 @@ function find(jobName,buildNumber) {
               console.log(error)
             }
           })
+          buildEventEmitter.emit('update', {builds: [result]})
+
           if(isFinished(result)) {
             finishedBuilds.push(jobName + ' #' + buildNumber)
           }
@@ -197,7 +218,10 @@ function getOutput(jobName,buildNumber) {
 
 exports.find = find
 exports.findRecent = findRecent
+exports.update = update
 exports.updateRecent = updateRecent
 exports.findMany = findMany
 exports.getOutput = getOutput
+exports.subscribe = subscribe
+exports.unsubscribe = unsubscribe
 
