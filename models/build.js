@@ -1,12 +1,10 @@
 var jenkinsapi = require('jenkins-api')
 var jenkins = jenkinsapi.init(process.env.JENKINS_HOST)
-var redisClient = require('./redis-client')
 var flatten = require('lodash-node/modern/arrays/flatten')
 var shuffle = require('lodash-node/modern/collections/shuffle')
 var Promise = require('es6-promise').Promise
 var Job = require('./job')
 var request = require('superagent')
-var db = require('./redis-client')
 var mongoose = require('mongoose')
 var Mixed = mongoose.Schema.Types.Mixed
 mongoose.connect(process.env.MONGO_URL);
@@ -144,8 +142,6 @@ function find(jobName,buildNumber) {
           result.jobName = jobName
           result.timestamp = new Date(result.timestamp)
 
-          //db.set(path, JSON.stringify(result), function() {})
-
           Build.findOneAndUpdate({
             jobName: jobName,
             number: buildNumber
@@ -180,7 +176,6 @@ function getOutputFromJenkins(jobName,buildNumber) {
       var lines = result.output.split("\n").slice(-200)
       result.output = humanize.nl2br(ansi_up.ansi_to_html(lines.join("\n")))
     }
-    //db.set(path, JSON.stringify(result), function() {})
 
     Build.update({
       jobName: jobName,
@@ -219,7 +214,6 @@ function getOutput(jobName,buildNumber) {
 
 exports.find = find
 exports.findRecent = findRecent
-exports.update = update
 exports.updateRecent = updateRecent
 exports.findMany = findMany
 exports.getOutput = getOutput
