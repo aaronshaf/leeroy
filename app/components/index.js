@@ -9,8 +9,37 @@ var extractGerritParameters = require('../../../utils/gerrit-params')
 var Build = require('../models/build')
 var BuildStatusImage = require('./build-status-image')
 
+function isFinished(result) {
+  return ['SUCCESS','FAILURE','ABORTED'].indexOf(result) > -1
+}
+
 function hasActions(build) {
   return build.actions && build.actions.find
+}
+
+function getTimeStatus(build) {
+  var time = ''
+
+  if(!build.timestamp) return null
+
+  if(build.duration && isFinished(build.result)) {
+    var startDate = new Date(build.timestamp)
+    return moment(startDate.getTime() + build.duration).fromNow()
+  }
+
+  var minutes
+  var seconds
+  if(build.duration) {
+    minutes = Math.floor(moment.duration(build.duration).asMinutes())
+    if(minutes) {
+      time = minutes + ' min '
+    }
+    seconds = Math.floor(moment.duration(build.duration % (60 * 1000)).asSeconds())
+    if(seconds) {
+      time += seconds + ' sec '
+    }
+  }
+  return time
 }
 
 module.exports = React.createClass({
@@ -58,20 +87,8 @@ module.exports = React.createClass({
       gerritChangeNumbers.add(id)
 
       var className = "leeroy-build-list-item"
-      var duration = ''
-      var minutes
-      var seconds
-      if(build.duration) {
-//        duration = moment
-        minutes = Math.floor(moment.duration(build.duration).asMinutes())
-        if(minutes) {
-          duration = minutes + ' min '
-        }
-        seconds = Math.floor(moment.duration(build.duration % (60 * 1000)).asSeconds())
-        if(seconds) {
-          duration += seconds + ' sec '
-        }
-      }
+      
+      var time = getTimeStatus(build)
 
       return (
         <li key={gerritParameters.GERRIT_CHANGE_NUMBER || build.id} className={className}>
@@ -86,8 +103,8 @@ module.exports = React.createClass({
               <div className="leeroy-build-list-item-title">
                 {gerritParameters.GERRIT_CHANGE_SUBJECT || build.fullDisplayName}
               </div>
-              <div className="leeroy-build-duration">
-                {duration}
+              <div className="leeroy-build-time">
+                {time}
               </div>
             </div>
           </Link>
