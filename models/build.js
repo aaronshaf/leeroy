@@ -115,10 +115,6 @@ function isFinished(result) {
   return result && result.result && ['FAILURE','SUCCESS','ABORTED'].indexOf(result.result) > -1
 }
 
-function update() {
-  buildEventEmitter.emit('update', {foo: 'bar'})
-}
-
 function find(jobName,buildNumber) {
   return new Promise(function(resolve, reject) {
     if(jobName == null || buildNumber == null) {

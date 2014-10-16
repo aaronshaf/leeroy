@@ -15,11 +15,6 @@ function partialListener(res) {
   }
 }
 
-app.get('/api/builds/test_stream', function(req, res) {
-  Build.update()
-  res.json(true)
-})
-
 app.get('/api/builds/stream', function(req, res) {
   req.socket.setTimeout(Infinity)
   var listener = partialListener(res)
