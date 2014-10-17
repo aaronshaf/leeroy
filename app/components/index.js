@@ -9,24 +9,22 @@ var extractGerritParameters = require('../../../utils/gerrit-params')
 var Build = require('../models/build')
 var BuildStatusImage = require('./build-status-image')
 
-function isFinished(result) {
-  return ['SUCCESS','FAILURE','ABORTED'].indexOf(result) > -1
-}
-
-function hasActions(build) {
-  return build.actions && build.actions.find
-}
 
 function getTimeStatus(build) {
   var time = ''
 
   if(!build.timestamp) return null
 
-  if(build.duration && isFinished(build.result)) {
+  if(build.duration && !build.building) {
     var startDate = new Date(build.timestamp)
-    return moment(startDate.getTime() + build.duration).fromNow()
+    time = moment(startDate.getTime() + build.duration).fromNow()
+  } else {
+    time = moment(build.timestamp).fromNow()
   }
 
+  return <div className="leeroy-build-time">{time}</div>
+
+  /*
   var minutes
   var seconds
   if(build.duration) {
@@ -40,6 +38,7 @@ function getTimeStatus(build) {
     }
   }
   return time
+  */
 }
 
 module.exports = React.createClass({
@@ -47,8 +46,7 @@ module.exports = React.createClass({
 
   getInitialState() {
     return {
-      builds: [],
-      loading: true
+      builds: []
     }
   },
 
@@ -57,20 +55,17 @@ module.exports = React.createClass({
   },
 
   componentDidMount() {
-    Build.findAll().then((result) => {
-      if(!this.isMounted()) return
+    Build.findAll().then((builds) => {
       this.setState({
-        builds: result.builds.filter(hasActions),
-        loading: false
+        builds: builds //result.builds.filter(hasActions),
       })
     })
 
     Build.subscribe((data) => {
-      if(data.builds) {
-        this.setState({
-          builds: this.state.builds.concat(data.builds)
-        })
-      }
+      if(!data.builds) return null
+      this.setState({
+        builds: this.state.builds.concat(data.builds)
+      })
     })
   },
 
@@ -87,11 +82,24 @@ module.exports = React.createClass({
       gerritChangeNumbers.add(id)
 
       var className = "leeroy-build-list-item"
-      
       var time = getTimeStatus(build)
 
+      var progress
+      var startTime
+      var estimatedEndTime
+      var progressRatio
+      var currentTime = (new Date()).getTime()
+
+      if(build.building) {
+        startTime = (new Date(build.timestamp)).getTime()
+        progressRatio = (currentTime - startTime) / build.estimatedDuration
+        progress = <progress max="1" value={progressRatio}></progress> 
+      }
+
+      var key = build.jobName + '-' + build.number
+
       return (
-        <li key={gerritParameters.GERRIT_CHANGE_NUMBER || build.id} className={className}>
+        <li key={key} className={className}>
           <Link to="build" className="leeroy-build-link" params={{
             jobName: build.jobName,
             buildNumber: build.number
@@ -103,21 +111,19 @@ module.exports = React.createClass({
               <div className="leeroy-build-list-item-title">
                 {gerritParameters.GERRIT_CHANGE_SUBJECT || build.fullDisplayName}
               </div>
-              <div className="leeroy-build-time">
-                {time}
-              </div>
+              {progress}
+              {time}
             </div>
           </Link>
         </li>
       )       
     })
 
-    if(this.state.loading) {
+    if(!this.state.builds.length) {
       return (
         <div className="leeroy-layout">
           <section className="leeroy-job-section">
             <ul className="leeroy-build-list">
-              <li>Loading...</li>
             </ul>
             <this.props.activeRouteHandler/>
           </section>

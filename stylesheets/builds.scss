@@ -114,3 +114,8 @@ $color1:#293640;
   font-size: 0.95rem;
   white-space: pre;
 }
+
+.leeroy-build-preview-column {
+  @extend %flex-1;
+}
+

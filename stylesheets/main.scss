@@ -26,3 +26,7 @@ body {
 .leeroy-jobs-list {
   @extend %flex-1;
 }
+
+progress {
+  width: 100%;
+}
