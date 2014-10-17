@@ -8,7 +8,7 @@ var moment = require('moment')
 var extractGerritParameters = require('../../../utils/gerrit-params')
 var Build = require('../models/build')
 var BuildStatusImage = require('./build-status-image')
-
+var ProgressBar = require('./progress-bar')
 
 function getTimeStatus(build) {
   var time = ''
@@ -41,12 +41,18 @@ function getTimeStatus(build) {
   */
 }
 
+function isOverdue(build) {
+  if(!build.building) return false
+  return (new Date()).getTime() > (new Date(build.timestamp)).getTime() + build.estimatedDuration
+}
+
 module.exports = React.createClass({
   displayName: 'Builds',
 
   getInitialState() {
     return {
-      builds: []
+      builds: [],
+      lastUpdated: moment().format()
     }
   },
 
@@ -62,6 +68,9 @@ module.exports = React.createClass({
     })
 
     Build.subscribe((data) => {
+      this.setState({
+        lastUpdated: moment().format()
+      })
       if(!data.builds) return null
       this.setState({
         builds: this.state.builds.concat(data.builds)
@@ -83,19 +92,7 @@ module.exports = React.createClass({
 
       var className = "leeroy-build-list-item"
       var time = getTimeStatus(build)
-
-      var progress
-      var startTime
-      var estimatedEndTime
-      var progressRatio
-      var currentTime = (new Date()).getTime()
-
-      if(build.building) {
-        startTime = (new Date(build.timestamp)).getTime()
-        progressRatio = (currentTime - startTime) / build.estimatedDuration
-        progress = <progress max="1" value={progressRatio}></progress> 
-      }
-
+      var progressBar = !isOverdue(build) ? <ProgressBar build={build} /> : null
       var key = build.jobName + '-' + build.number
 
       return (
@@ -111,7 +108,7 @@ module.exports = React.createClass({
               <div className="leeroy-build-list-item-title">
                 {gerritParameters.GERRIT_CHANGE_SUBJECT || build.fullDisplayName}
               </div>
-              {progress}
+              {progressBar}
               {time}
             </div>
           </Link>
@@ -135,6 +132,7 @@ module.exports = React.createClass({
       <div className="leeroy-layout">
         <section className="leeroy-job-section">
           <ul className="leeroy-build-list">
+            <div className="leeroy-last-updated">{this.state.lastUpdated}</div>
             {builds}
           </ul>
           <this.props.activeRouteHandler/>

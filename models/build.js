@@ -87,7 +87,7 @@ function unfinished(build) {
 
 function findAllBuilds(builds) {
   return Promise.all(builds.map(function(build) {
-    return find(build.jobName,build.number)
+    return findOne(build.jobName,build.number)
   }))
 }
 
@@ -107,7 +107,7 @@ function updateRecent() {
 
 function findMany(jobName,buildNumbers) {
   return Promise.all(buildNumbers.map(function(buildNumber) {
-    return find(jobName,buildNumber)
+    return findOne(jobName,buildNumber)
   }))
 }
 
@@ -115,9 +115,9 @@ function isFinished(result) {
   return result && result.result && ['FAILURE','SUCCESS','ABORTED'].indexOf(result.result) > -1
 }
 
-function find(jobName,buildNumber) {
+function findOne(jobName,buildNumber) {
   return new Promise(function(resolve, reject) {
-    if(jobName == null || buildNumber == null) {
+    if(!jobName || !buildNumber) {
       return reject()
     }
     var parsedResult = {}
@@ -130,6 +130,8 @@ function find(jobName,buildNumber) {
       //if(error || !result) {
       //  reject()
       //} 
+      
+      resolve(result)
 
       if(!isFinished(result)) {
         jenkins.build_info(jobName,buildNumber,function(error, result) {
@@ -153,13 +155,11 @@ function find(jobName,buildNumber) {
           if(isFinished(result)) {
             finishedBuilds.push(jobName + ' #' + buildNumber)
           }
-          resolve(result)
         })
         getOutputFromJenkins(jobName,buildNumber)
       } else {
         finishedBuilds.push(jobName + ' #' + buildNumber)
         //console.log(path + ' already finished')
-        resolve(result)
       }
     })
   })
@@ -208,7 +208,7 @@ function getOutput(jobName,buildNumber) {
   })
 }
 
-exports.find = find
+exports.findOne = findOne
 exports.findRecent = findRecent
 exports.updateRecent = updateRecent
 exports.findMany = findMany

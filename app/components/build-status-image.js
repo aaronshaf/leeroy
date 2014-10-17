@@ -20,7 +20,7 @@ module.exports = React.createClass({
         statusImgSrc = '/svg/icon-abort.svg'
         break
       default:
-        statusImgSrc = '/svg/icon-empty.svg'
+        return null
     }
     return <img src={statusImgSrc} className="leeroy-build-status" />
   }

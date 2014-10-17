@@ -36,7 +36,7 @@ function compareBuilds(a,b) {
 }
 
 function getBuilds() {
-  return buildMap.sort(compareBuilds).take(50).toArray()
+  return buildMap.sort(compareBuilds).toArray()
 }
 
 var Build = {
