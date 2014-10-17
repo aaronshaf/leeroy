@@ -30,3 +30,8 @@ body {
 progress {
   width: 100%;
 }
+
+progress::-webkit-progress-value {
+  -webkit-transition : width 1s ease;
+  transition : width 1s ease;
+}
