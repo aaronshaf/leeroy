@@ -1,5 +1,3 @@
-var jenkinsapi = require('jenkins-api')
-var jenkins = jenkinsapi.init(process.env.JENKINS_HOST)
 var Promise = require('es6-promise').Promise
 var Build = require('./build')
 var request = require('superagent')
