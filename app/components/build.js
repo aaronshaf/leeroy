@@ -23,10 +23,16 @@ module.exports = React.createClass({
   },
 
   shouldComponentUpdate(nextProps, nextState) {
-    return true
+    if(this.props.params.buildNumber !== nextProps.params.buildNumber)
+      return true
+
+    if(this.props.params.jobName !== nextProps.params.jobName)
+      return true
+
+    return false
   },
 
-  componentWillReceiveProps(nextProps) {
+  componentWillUpdate(nextProps) {
     this.update(nextProps)
   },
 

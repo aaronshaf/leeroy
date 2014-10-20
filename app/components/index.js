@@ -78,9 +78,24 @@ module.exports = React.createClass({
 
     var filteredBuilds = this.state.builds.filter((build) => {
       if(!this.state.filterQuery) return true
-      if(build.jobName.indexOf(this.state.filterQuery) > -1) return true
+      var query = this.state.filterQuery.toLowerCase()
+    
+      if(build.jobName.indexOf(query) > -1) return true
+
       var gerritParameters = extractGerritParameters(build)
-      
+
+      var parametersToWatch = [
+        'GERRIT_CHANGE_SUBJECT',
+        'GERRIT_EVENT_ACCOUNT_EMAIL',
+        'GERRIT_PATCHSET_UPLOADER_NAME'
+      ]
+      var param
+      for(param of parametersToWatch) {
+        if(gerritParameters[param]
+            && gerritParameters[param].toLowerCase().indexOf(query) > -1)
+          return true 
+      }
+
       return false
     })
 
@@ -142,6 +157,7 @@ module.exports = React.createClass({
           <div className="leeroy-master-column">
             <div className="leeroy-build-filter">
               <input
+                  placeholder="Leeroy"
                   className="leeroy-build-filter-search-input"
                   type="text"
                   ref="filterQuery"
