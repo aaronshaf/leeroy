@@ -6,7 +6,7 @@ var io = require('socket.io')(server)
 var Job = require('./models/job')
 var Build = require('./models/build')
 var Promise = require('es6-promise').Promise
-//setInterval(Build.updateRecent,20000) // 20 seconds
+setInterval(Build.updateRecent,20000) // 20 seconds
 
 function partialListener(res) {
   return function(message) {
