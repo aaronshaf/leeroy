@@ -172,7 +172,6 @@ function getOutputFromJenkins(jobName,buildNumber) {
   // TODO: throttle/queue this
   var url =  process.env.JENKINS_HOST + '/job/' + jobName + '/' + buildNumber + '/consoleText'
   console.log('getOutputFromJenkins',url)
-  return null;
   request.get(url).end(function(error,response) {
     if(error) return null
     
