@@ -6,7 +6,7 @@ var io = require('socket.io')(server)
 var Job = require('./models/job')
 var Build = require('./models/build')
 var Promise = require('es6-promise').Promise
-setInterval(Build.updateRecent,20000) // 15 seconds
+//setInterval(Build.updateRecent,20000) // 20 seconds
 
 function partialListener(res) {
   return function(message) {
@@ -102,7 +102,7 @@ app.get('/api/jobs/:job/builds/:build/output', function(req, res){
     res.end(JSON.stringify({output: data}, null, 2))
   }).catch(function(err) {
     res.setHeader('Content-Type', 'application/json')
-    console.log('failure')
+    console.log('failure',err)
     res.end(JSON.stringify(data, null, 2))
     return console.log(err)
   })

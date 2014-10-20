@@ -40,8 +40,6 @@ module.exports = React.createClass({
   },
 
   getBuild(props) {
-    //Build.findAll()
-    //Bind.subscribe('*',
     Build.findOne(props.params.jobName,props.params.buildNumber).then((build) => {
       this.setState({
         build: build,
@@ -70,10 +68,14 @@ module.exports = React.createClass({
     if(this.state.gerritParameters.GERRIT_EVENT_ACCOUNT_EMAIL) {
       imageUrl = gravatar.url(this.state.gerritParameters.GERRIT_EVENT_ACCOUNT_EMAIL, {
         s: '70',
-        r: 'pg'
-//        d: 'blank'
+        r: 'pg',
+        d: 'mm'
       });
-      mug = <img src={imageUrl} className="leeroy-build-mug" />
+      mug = (
+        <a href="http://en.gravatar.com/">
+          <img key={imageUrl} src={imageUrl} className="leeroy-build-mug" />
+        </a>
+      )
     }
 
     var changesetComment = null
@@ -95,14 +97,14 @@ module.exports = React.createClass({
 
     return (
       <section className="leeroy-build-section">
-        <h1>{patchSetLink}</h1>
-
         {mug}
         {this.state.gerritParameters.GERRIT_PATCHSET_UPLOADER_NAME}
 
         <div
         className="leeroy-changeset-comment"
         dangerouslySetInnerHTML={{__html: changesetComment}}></div>
+
+        <hr/>
 
         <div className="leeroy-console-output" ref="console-output"></div>
 

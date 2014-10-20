@@ -14,31 +14,19 @@ function getTimeStatus(build) {
   var time = ''
 
   if(!build.timestamp) return null
+  var startDate = new Date(build.timestamp)
 
-  if(build.duration && !build.building) {
-    var startDate = new Date(build.timestamp)
-    time = moment(startDate.getTime() + build.duration).fromNow()
+  if(!isOverdue(build)) {
+    if(build.duration && !build.building) {
+      time = moment(startDate.getTime() + build.duration).fromNow()
+    } else {
+      time = moment(build.timestamp).fromNow()
+    }
   } else {
-    time = moment(build.timestamp).fromNow()
+    time = moment(startDate.getTime() + build.estimatedDuration).fromNow(true) + ' overdue'
   }
 
   return <div className="leeroy-build-time">{time}</div>
-
-  /*
-  var minutes
-  var seconds
-  if(build.duration) {
-    minutes = Math.floor(moment.duration(build.duration).asMinutes())
-    if(minutes) {
-      time = minutes + ' min '
-    }
-    seconds = Math.floor(moment.duration(build.duration % (60 * 1000)).asSeconds())
-    if(seconds) {
-      time += seconds + ' sec '
-    }
-  }
-  return time
-  */
 }
 
 function isOverdue(build) {
@@ -52,7 +40,8 @@ module.exports = React.createClass({
   getInitialState() {
     return {
       builds: [],
-      lastUpdated: moment().format()
+      lastUpdated: moment().format(),
+      filterQuery: localStorage.filterQuery
     }
   },
 
@@ -63,7 +52,7 @@ module.exports = React.createClass({
   componentDidMount() {
     Build.findAll().then((builds) => {
       this.setState({
-        builds: builds //result.builds.filter(hasActions),
+        builds: builds 
       })
     })
 
@@ -78,10 +67,24 @@ module.exports = React.createClass({
     })
   },
 
+  handleFilterQuery() {
+    this.setState({
+      filterQuery: localStorage.filterQuery = this.refs.filterQuery.getDOMNode().value
+    })
+  },
+
   render() {
     var gerritChangeNumbers = new Set()
 
-    var builds = this.state.builds.map((build) => {
+    var filteredBuilds = this.state.builds.filter((build) => {
+      if(!this.state.filterQuery) return true
+      if(build.jobName.indexOf(this.state.filterQuery) > -1) return true
+      var gerritParameters = extractGerritParameters(build)
+      
+      return false
+    })
+
+    var builds = filteredBuilds.map((build) => {
       var gerritParameters = extractGerritParameters(build)
       var id 
       id = gerritParameters.GERRIT_CHANGE_NUMBER || build.id
@@ -92,7 +95,12 @@ module.exports = React.createClass({
 
       var className = "leeroy-build-list-item"
       var time = getTimeStatus(build)
-      var progressBar = !isOverdue(build) ? <ProgressBar build={build} /> : null
+
+      var progressBar
+      if(build.building && !isOverdue(build)) {
+        progressBar = <ProgressBar build={build} />
+      }
+        
       var key = build.jobName + '-' + build.number
 
       return (
@@ -131,10 +139,20 @@ module.exports = React.createClass({
     return (
       <div className="leeroy-layout">
         <section className="leeroy-job-section">
-          <ul className="leeroy-build-list">
-            <div className="leeroy-last-updated">{this.state.lastUpdated}</div>
-            {builds}
-          </ul>
+          <div className="leeroy-master-column">
+            <div className="leeroy-build-filter">
+              <input
+                  className="leeroy-build-filter-search-input"
+                  type="text"
+                  ref="filterQuery"
+                  onInput={this.handleFilterQuery}
+                  defaultValue={localStorage.filterQuery || ''} />
+              <img src="/svg/icon-search.svg" className="leeroy-search-icon" />
+            </div>
+            <ul className="leeroy-build-list">
+              {builds}
+            </ul>
+          </div>
           <this.props.activeRouteHandler/>
         </section>
       </div>

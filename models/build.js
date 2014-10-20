@@ -1,5 +1,3 @@
-var jenkinsapi = require('jenkins-api')
-var jenkins = jenkinsapi.init(process.env.JENKINS_HOST)
 var flatten = require('lodash-node/modern/arrays/flatten')
 var shuffle = require('lodash-node/modern/collections/shuffle')
 var Promise = require('es6-promise').Promise
@@ -122,6 +120,7 @@ function findOne(jobName,buildNumber) {
     }
     var parsedResult = {}
     var path = 'jobs/' + jobName + '/builds/' + buildNumber
+    var url = process.env.JENKINS_HOST + '/job/' + jobName + '/' + buildNumber + '/api/json'
 
     Build.findOne({
       jobName: jobName,
@@ -134,8 +133,8 @@ function findOne(jobName,buildNumber) {
       resolve(result)
 
       if(!isFinished(result)) {
-        jenkins.build_info(jobName,buildNumber,function(error, result) {
-          result = sanitizeKeys(result)
+        request.get(url).accept('json').end(function(error,response) {
+          var result = sanitizeKeys(response.body)
 
           result.jobName = jobName
           result.timestamp = new Date(result.timestamp)
@@ -156,28 +155,37 @@ function findOne(jobName,buildNumber) {
             finishedBuilds.push(jobName + ' #' + buildNumber)
           }
         })
-        getOutputFromJenkins(jobName,buildNumber)
       } else {
         finishedBuilds.push(jobName + ' #' + buildNumber)
         //console.log(path + ' already finished')
+      }
+
+      if(!isFinished(result)) {
+        getOutputFromJenkins(jobName,buildNumber)
       }
     })
   })
 }
 
 function getOutputFromJenkins(jobName,buildNumber) {
-  jenkins.job_output(jobName,buildNumber,function(error, result) {
+  // TODO: throttle/queue this
+  var url =  process.env.JENKINS_HOST + '/job/' + jobName + '/' + buildNumber + '/consoleText'
+  console.log('getOutputFromJenkins',url)
+  return null;
+  request.get(url).end(function(error,response) {
+    if(error) return null
+    
     var lines
-    if(!error && result && result.output) {
-      var lines = result.output.split("\n").slice(-200)
-      result.output = humanize.nl2br(ansi_up.ansi_to_html(lines.join("\n")))
+    if(!error && response.text) {
+      var lines = response.text.split("\n").slice(-200)
+      response.text = humanize.nl2br(ansi_up.ansi_to_html(lines.join("\n")))
     }
 
     Build.update({
       jobName: jobName,
       number: buildNumber
     }, {
-      output: result.output
+      output: response.text
     }, {
       upsert: true
     }, function(error, result) {
@@ -189,9 +197,6 @@ function getOutputFromJenkins(jobName,buildNumber) {
 
 function getOutput(jobName,buildNumber) {
   return new Promise(function(resolve, reject) {
-    var returned = false
-    path = 'jobs/' + jobName + '/builds/' + buildNumber + '/output'
-
     Build.findOne({
       jobName: jobName,
       number: buildNumber
@@ -200,7 +205,7 @@ function getOutput(jobName,buildNumber) {
       output: 1
     }).exec(function(error, result) {
       if(error || !result) return reject()
-      if(!isFinished(result)) {
+      if(!isFinished(result) || !result.output) {
         getOutputFromJenkins(jobName,buildNumber)
       }
       resolve(result.output)

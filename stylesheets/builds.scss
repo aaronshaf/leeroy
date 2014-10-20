@@ -1,4 +1,4 @@
-$color1:#293640;
+$color1: #293640;
 
 .leeroy-build-section {
   padding: 18px;
@@ -8,21 +8,66 @@ $color1:#293640;
   color: white;
 }
 
-.leeroy-console-output {
+.leeroy-changeset-comment {
+  display: block;
+  margin-top: 14px;
+  margin-bottom: 14px;
+}
+
+.leeroy-build-filter {
+  @extend %flex;
+  padding: 10px;
+}
+
+.leeroy-build-filter-search-input {
+  @extend %flex-1;
+  font-size: 1rem;
+  padding: 6px;
+  background-color: transparent;
+  color: white;
+  border: 0 none;
+  margin: 3px;
+}
+
+.leeroy-build-filter-search-input:focus {
+  outline: 0 none;
+}
+
+.leeroy-console-output,
+.leeroy-changeset-comment {
   font-family: "Source Code Pro", "Menlo", Courier, "Courier New", monospace;
+  font-size: 0.9rem;
+  line-height: 1.45rem;
+}
+
+.leeroy-console-output {
+  margin-top: 14px;
+}
+
+.leeroy-build-output {
+  color: #F1F1F1;
+  line-height: 1.6rem;
+  background-color: #222222;
+  padding: 8px;
+  font-size: 0.95rem;
+  white-space: pre;
 }
 
 .leeroy-build-mug {
   border-radius: 52px;
-  width: 52px;
-  height: 52px;
+  width: 32px;
+  height: 32px;
+  margin-right: 6px;
   border-color: transparent;
 }
 
-.leeroy-build-list {
+.leeroy-master-column {
   overflow: auto;
   max-width: 450px;
   background-color: $color1;
+}
+
+.leeroy-build-list {
   margin: 0;
 }
 
@@ -98,24 +143,12 @@ $color1:#293640;
   margin-top: 1px;
 }
 
-.leeroy-changeset-comment {
-  display: block;
-  padding: 8px;
-  font-size: 0.9rem;
-  border-radius: 3px;
-}
-
-.leeroy-build-output {
-  font-family: monospace;
-  color: #F1F1F1;
-  line-height: 1.6rem;
-  background-color: #222222;
-  padding: 8px;
-  font-size: 0.95rem;
-  white-space: pre;
-}
-
 .leeroy-build-preview-column {
   @extend %flex-1;
 }
 
+.leeroy-search-icon {
+  margin: 4px;
+  width: 24px;
+  height: 24px;
+}

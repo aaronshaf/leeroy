@@ -35,3 +35,7 @@ progress::-webkit-progress-value {
   -webkit-transition : width 1s ease;
   transition : width 1s ease;
 }
+
+hr {
+  border-bottom: 0.5px solid #4A4A4A;
+}
