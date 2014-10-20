@@ -46,6 +46,7 @@ Build.find({
     {result: "FAILURE"}
   ]
 }).select({jobName:1,number:1}).sort({timestamp:-1}).limit(1500).exec(function(error, result) {
+  if(error || !result) return null
   result.forEach(function(build) {
     finishedBuilds.push(build.jobName + ' #' + build.number)
   })
