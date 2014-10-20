@@ -76,7 +76,7 @@ module.exports = React.createClass({
       //})
 
       // Dirty
-      this.refs['console-output'].getDOMNode().innerHTML = result.body.output 
+      this.refs['console-output'].getDOMNode().innerHTML = result.body.output
     }) 
   },
 
