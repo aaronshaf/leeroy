@@ -95,6 +95,11 @@ app.get('/api/jobs/:job/builds/:build', function(req, res){
     })
 })
 
+app.post('/api/jobs/:job/builds/:build', function(req, res) {
+  Build.retrigger(req.params.job, req.params.build) 
+  res.status(200).json(true)
+})
+
 app.get('/api/jobs/:job/builds/:build/output', function(req, res){
   Build.getOutput(req.params.job, parseInt(req.params.build,10)).then(function(data) {
     res.setHeader('Content-Type', 'application/json')

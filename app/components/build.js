@@ -22,17 +22,25 @@ module.exports = React.createClass({
     }
   },
 
+  /*
   shouldComponentUpdate(nextProps, nextState) {
     if(this.props.params.buildNumber !== nextProps.params.buildNumber)
       return true
 
     if(this.props.params.jobName !== nextProps.params.jobName)
       return true
-
-    return false
   },
+  */
 
-  componentWillUpdate(nextProps) {
+  componentWillReceiveProps(nextProps) {
+    /*
+    if(this.props.params.buildNumber === nextProps.params.buildNumber)
+      return false
+
+    if(this.props.params.jobName === nextProps.params.jobName)
+      return false
+    */
+
     this.update(nextProps)
   },
 
@@ -47,16 +55,20 @@ module.exports = React.createClass({
 
   getBuild(props) {
     Build.findOne(props.params.jobName,props.params.buildNumber).then((build) => {
-      this.setState({
-        build: build,
-        gerritParameters: gerritParameters(build)
-      })
+      if (this.isMounted()) {
+        this.setState({
+          build: build,
+          gerritParameters: gerritParameters(build)
+        }, () => {
+          //this.forceUpdate()
+        })
+      }
     })
   },
 
   getOutput(props) {
     request.get('/api/jobs/' + props.params.jobName + '/builds/' + props.params.buildNumber + '/output', (error, result) => {
-      if(error || !result.body) {
+      if (error || !result.body) {
         return
       }
       //this.setState({
@@ -101,9 +113,9 @@ module.exports = React.createClass({
       )
     }
 
-    var retryIcon = null
+    var retriggerIcon = null
     if(['ABORTED','FAILURE'].indexOf(this.state.build.result) > -1) {
-      var retryIcon = (
+      retriggerIcon = (
         <a href="#">
           <img src="/svg/icon-retry.svg" className="leeroy-retry-icon" />
         </a>      
@@ -117,7 +129,7 @@ module.exports = React.createClass({
           {this.state.gerritParameters.GERRIT_PATCHSET_UPLOADER_NAME}
 
           <div className="leeroy-build-actions">
-            {retryIcon}
+            {retriggerIcon}
           </div>
         </div>
 

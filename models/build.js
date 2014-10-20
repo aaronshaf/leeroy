@@ -214,6 +214,11 @@ function getOutput(jobName,buildNumber) {
   })
 }
 
+function retrigger(jobName,buildNumber) {
+  var url =  process.env.JENKINS_HOST + '/job/' + jobName + '/' + buildNumber + '/gerrit-trigger-retrigger-this'
+  request.get(url).end(function(error, result) {})
+}
+
 exports.findOne = findOne
 exports.findRecent = findRecent
 exports.updateRecent = updateRecent
@@ -221,4 +226,5 @@ exports.findMany = findMany
 exports.getOutput = getOutput
 exports.subscribe = subscribe
 exports.unsubscribe = unsubscribe
+exports.retrigger = retrigger
 
