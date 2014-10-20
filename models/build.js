@@ -5,7 +5,7 @@ var Job = require('./job')
 var request = require('superagent')
 var mongoose = require('mongoose')
 var Mixed = mongoose.Schema.Types.Mixed
-mongoose.connect(process.env.MONGO_URL);
+mongoose.connect(process.env.MONGODB_URL);
 var Schema = mongoose.Schema
 var sanitizeKeys = require('../utils/sanitize-keys')
 var ansi_up = require('ansi_up')
