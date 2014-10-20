@@ -15,7 +15,7 @@ var EventEmitter = require("events").EventEmitter
 var buildEventEmitter = new EventEmitter()
 
 console.log('JENKINS_HOST=',process.env.JENKINS_HOST)
-console.log('MONGO_URL=',process.env.MONGO_URL)
+console.log('MONGODB_URL=',process.env.MONGODB_URL)
 
 var buildSchema = new Schema({
   jobName: String,
