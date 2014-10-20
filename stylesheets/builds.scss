@@ -4,7 +4,6 @@ $color1: #293640;
   padding: 18px;
   overflow-y: auto;
   overflow-x: hidden;
-  background-color: #222;
   color: white;
 }
 
@@ -147,8 +146,20 @@ $color1: #293640;
   @extend %flex-1;
 }
 
-.leeroy-search-icon {
+.leeroy-detail-toolbar {
+  @extend %flex;
+  @extend %align-items-center;
+}
+
+.leeroy-build-actions {
+  @extend %flex-1;
+  text-align: right;
+}
+
+.leeroy-search-icon,
+.leeroy-retry-icon {
   margin: 4px;
   width: 24px;
   height: 24px;
 }
+

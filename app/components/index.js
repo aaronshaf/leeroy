@@ -139,18 +139,6 @@ module.exports = React.createClass({
       )       
     })
 
-    if(!this.state.builds.length) {
-      return (
-        <div className="leeroy-layout">
-          <section className="leeroy-job-section">
-            <ul className="leeroy-build-list">
-            </ul>
-            <this.props.activeRouteHandler/>
-          </section>
-        </div>
-      )
-    }
-
     return (
       <div className="leeroy-layout">
         <section className="leeroy-job-section">

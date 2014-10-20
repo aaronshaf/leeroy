@@ -101,10 +101,25 @@ module.exports = React.createClass({
       )
     }
 
+    var retryIcon = null
+    if(['ABORTED','FAILURE'].indexOf(this.state.build.result) > -1) {
+      var retryIcon = (
+        <a href="#">
+          <img src="/svg/icon-retry.svg" className="leeroy-retry-icon" />
+        </a>      
+      )
+    }
+
     return (
       <section className="leeroy-build-section">
-        {mug}
-        {this.state.gerritParameters.GERRIT_PATCHSET_UPLOADER_NAME}
+        <div className="leeroy-detail-toolbar">
+          {mug}
+          {this.state.gerritParameters.GERRIT_PATCHSET_UPLOADER_NAME}
+
+          <div className="leeroy-build-actions">
+            {retryIcon}
+          </div>
+        </div>
 
         <div
         className="leeroy-changeset-comment"
