@@ -2,7 +2,6 @@ require('dotenv').load()
 var express = require('express')
 var app = express()
 var server = require('http').Server(app)
-var io = require('socket.io')(server)
 var Job = require('./models/job')
 var Build = require('./models/build')
 var Promise = require('es6-promise').Promise
