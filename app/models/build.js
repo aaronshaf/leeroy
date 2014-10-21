@@ -1,17 +1,9 @@
 var Promise = require('es6-promise').Promise
 var request = require('superagent')
-var source = new EventSource('/api/builds/stream')
 var Map = require('immutable').Map
+var stream = require('../utils/stream')
 
 var buildMap = Map().asMutable()
-
-source.addEventListener('open', function(e) {
-  console.log('Connection was opened.')
-}, false)
-
-source.addEventListener('error', function(e) {
-  console.log('EventSource error',e)
-}, false)
 
 function hasActions(build) {
   return build.actions && build.actions.find
@@ -61,7 +53,7 @@ var Build = {
   },
 
   subscribe(callback) {
-    source.addEventListener('message', function(e) {
+    stream.addEventListener('message', function(e) {
       var build = JSON.parse(e.data)
       addBuild(build)
       callback(getBuilds())

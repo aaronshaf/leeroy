@@ -22,29 +22,23 @@ module.exports = React.createClass({
     }
   },
 
-  /*
-  shouldComponentUpdate(nextProps, nextState) {
-    if(this.props.params.buildNumber !== nextProps.params.buildNumber)
+  shouldComponentUpdate(nextProps) {
+    if(this.props.params.buildNumber !== nextProps.params.buildNumber) {
       return true
+    }
 
-    if(this.props.params.jobName !== nextProps.params.jobName)
+    if(this.props.params.jobName !== nextProps.params.jobName) {
       return true
-  },
-  */
+    }
 
-  componentWillReceiveProps(nextProps) {
-    /*
-    if(this.props.params.buildNumber === nextProps.params.buildNumber)
-      return false
-
-    if(this.props.params.jobName === nextProps.params.jobName)
-      return false
-    */
-
-    this.update(nextProps)
+    return false
   },
 
   componentDidMount() {
+    this.update(this.props)
+  },
+
+  componentDidUpdate() {
     this.update(this.props)
   },
 
@@ -54,6 +48,7 @@ module.exports = React.createClass({
   },
 
   getBuild(props) {
+    console.log('getBuild')
     Build.findOne(props.params.jobName,props.params.buildNumber).then((build) => {
       if (this.isMounted()) {
         this.setState({
@@ -76,7 +71,9 @@ module.exports = React.createClass({
       //})
 
       // Dirty
-      this.refs['console-output'].getDOMNode().innerHTML = result.body.output 
+      if (this.isMounted()) {
+        this.refs['console-output'].getDOMNode().innerHTML = result.body.output 
+      }
     }) 
   },
 

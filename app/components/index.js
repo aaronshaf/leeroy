@@ -9,6 +9,7 @@ var extractGerritParameters = require('../../../utils/gerrit-params')
 var Build = require('../models/build')
 var BuildStatusImage = require('./build-status-image')
 var ProgressBar = require('./progress-bar')
+var stream = require('../utils/stream')
 
 function getTimeStatus(build) {
   var time = ''
@@ -41,7 +42,8 @@ module.exports = React.createClass({
     return {
       builds: [],
       lastUpdated: moment().format(),
-      filterQuery: localStorage.filterQuery
+      filterQuery: localStorage.filterQuery,
+      connectionStatus: false
     }
   },
 
@@ -65,6 +67,15 @@ module.exports = React.createClass({
         builds: this.state.builds.concat(data.builds)
       })
     })
+
+    stream.addEventListener('open', () => {
+      this.setState({connectionStatus: true})
+    })
+
+    stream.addEventListener('error', () => {
+      console.log('error')
+    })
+
   },
 
   handleFilterQuery() {
@@ -139,6 +150,10 @@ module.exports = React.createClass({
       )       
     })
 
+    // var connectedIcon = <img alt="Connected" src="/svg/icon-cloud.svg" className="leeroy-search-icon" /> 
+    var disconnectedIcon = <img alt="Connected" src="/svg/icon-cloud-off.svg" className="leeroy-search-icon" /> 
+    var connectionStatusIcon = this.state.connectionStatus ? null : disconnectedIcon
+
     return (
       <div className="leeroy-layout">
         <section className="leeroy-job-section">
@@ -151,6 +166,7 @@ module.exports = React.createClass({
                   ref="filterQuery"
                   onInput={this.handleFilterQuery}
                   defaultValue={localStorage.filterQuery || ''} />
+              {connectionStatusIcon}
               <img src="/svg/icon-search.svg" className="leeroy-search-icon" />
             </div>
             <ul className="leeroy-build-list">
